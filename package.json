@@ -1,0 +1,36 @@
+{
+  "name": "webspoon",
+  "version": "1.0.0",
+  "description": "这是一个 Web 前端工程化的工具包。",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "postinstall": "./node_modules/babel/bin/babel.js src -d bin; chmod 755 bin/*.js"
+  },
+  "bin": {
+    "webspoon-usemin": "./bin/usemin.js",
+    "webspoon-rev": "./bin/rev.js"
+  },
+  "author": "YanagiEiichi",
+  "license": "MIT",
+  "dependencies": {
+    "babel": "^5.8.3",
+    "babel-fs": "^1.0.2",
+    "glob": "^5.0.14"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ElemeFE/webspoon.git"
+  },
+  "keywords": [
+    "usemin",
+    "rev"
+  ],
+  "bugs": {
+    "url": "https://github.com/ElemeFE/webspoon/issues"
+  },
+  "homepage": "https://github.com/ElemeFE/webspoon#readme"
+}

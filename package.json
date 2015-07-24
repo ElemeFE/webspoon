@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "postinstall": "./node_modules/babel/bin/babel.js src -d bin; chmod 755 bin/*.js"
+    "postinstall": "babel src -d bin; chmod 755 bin/*.js"
   },
   "bin": {
     "webspoon-usemin": "./bin/usemin.js",
@@ -20,7 +20,6 @@
     "babel-fs": "^1.0.2",
     "glob": "^5.0.14"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/ElemeFE/webspoon.git"

@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "install": "babel src -d bin"
+    "prepublish": "babel src -d bin"
   },
   "bin": {
     "webspoon-usemin": "./bin/usemin.js",
@@ -16,9 +16,11 @@
   "author": "YanagiEiichi",
   "license": "MIT",
   "dependencies": {
-    "babel": "^5.8.3",
     "babel-fs": "^1.0.2",
     "glob": "^5.0.14"
+  },
+  "devDependencies": {
+    "babel": "^5.8.3"
   },
   "repository": {
     "type": "git",

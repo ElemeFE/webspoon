@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "postinstall": "babel src -d bin; chmod 755 bin/*.js"
+    "install": "babel src -d bin"
   },
   "bin": {
     "webspoon-usemin": "./bin/usemin.js",

@@ -11,7 +11,8 @@
   },
   "bin": {
     "webspoon-usemin": "./bin/usemin.js",
-    "webspoon-rev": "./bin/rev.js"
+    "webspoon-rev": "./bin/rev.js",
+    "webspoon-watch": "./bin/watch.js"
   },
   "author": "YanagiEiichi",
   "license": "MIT",

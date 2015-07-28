@@ -3,20 +3,20 @@
 这是一个 Web 前端工程化的工具包。
 
 
-### 安装
+### 安装方式
 
-```
+```bash
 npm install webspoon
 ```
 
 或者也可以全局安装
 
-```
+```bash
 sudo npm install webspoon -g
 ```
 
 
-### 工具
+### 提供的工具
 
 ##### webspoon-usemin
 
@@ -60,3 +60,23 @@ static 列表指定的是静态文件，它会根据其自身内容重命名到�
   2. base 列表中的文件更新后会覆盖原始文件，如果不希望被覆盖请先复制出来。
   3. static 列表中的文件操作是被重命名而不是复制，如需备份请提前。
 
+
+##### webspoon-watch
+
+用于给静态资的文件名中加入 hash，同时替换引用文件的引用路径。
+
+```bash
+webspoon-watch -target <FileList> -exec <Command>
+```
+
+传入两个参数 -target 和 -exec。
+
+target 参数用于指定需要监视的文件。
+
+exec 参数用于指定监视到文件变化后需要执行的脚本。
+
+在执行的脚本中可以通过 $src 变量来取到当前处理的文件路径（相对路径）。
+
+注：
+  1. 只有当文件内容有变化时才会触发。
+  2. 通配符初始解析，这意味着开始 watch 之后才创建的文件不会被 watch 到。

@@ -49,7 +49,7 @@ Promise.resolve(process.argv.slice(2)).then(args => {
         .then(result => bfs.writeFile(fixFilePath(pathname), result));
         // 保存任务并替换字符串
         tasks.push(task);
-        return `<script src="${pathname}"><script>`;
+        return `<script src="${pathname}"></script>`;
       });
       return bfs.writeFile(pathname, data);
     });

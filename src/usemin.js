@@ -35,7 +35,7 @@ Promise.resolve(process.argv.slice(2)).then(args => {
       data = data.replace(/<!--\s*build\s*(\S+)\s*-->([\s\S]*?)<!--\s*endbuild\s*-->/g, ($0, pathname, content) => {
         // 从 HTML 片段中搜索并读入引用的文件
         var list = [];
-        var matcher = /<(script|link).*?(src|href)\s*=\s*(["'])(.*?)(\2)/ig;
+        var matcher = /<(script|link).*?(?:src|href)\s*=\s*(["'])(.*?)(\2)/ig;
         while(matcher.exec(content)) {
           list.push(Promise.all([RegExp.$1.toLowerCase(), bfs.readFile(fixFilePath(RegExp.$3))]));
         }

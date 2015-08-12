@@ -29,9 +29,9 @@ webspoon-usemin <FileList>
 在 html 文件中可能有这样的注释块。
 
 ```html
-<!-- build 生成文件保存路径 -->
-<script src="js文件路径"></script>
-<link rel="stylesheet" href="js文件路径">
+<!-- build href="引用路径" file="文件路径" -->
+<script src="引用路径" file="文件路径"></script>
+<link rel="stylesheet" href="js文件路径" file="文件路径">
 <!-- endbuild -->
 ```
 

@@ -9,10 +9,12 @@ import bfs from 'babel-fs';
 **/
 
 
-var matchUsemin = string => ({
-  file: /file\s*=\s*"(.*?)"|$/.exec(string)[1],
-  href: /(?:href|src)\s*=\s*"(.*?)"|$/.exec(string)[1]
-});
+var matchUsemin = string => {
+  var file = /file\s*=\s*"(.*?)"|$/.exec(string)[1];
+  var href = /(?:href|src)\s*=\s*"(.*?)"|$/.exec(string)[1];
+  if(file === void 0 && href) file = href.replace(/^\//, '');
+  return { file, href };
+};
 
 /**
  * 主过程

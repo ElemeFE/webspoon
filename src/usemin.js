@@ -26,7 +26,11 @@ Promise.resolve(process.argv.slice(2)).then(args => {
     new Promise((resolve, reject) => {
       glob(value, (error, list) => error ? reject(error) : resolve(list));
     })
-  )).then(list => [].concat(...list));
+  )).then(list => {
+    list = [].concat(...list);
+    list.sort();
+    return list;
+  });
 })
 
 // 将 staticList 的文件重命名为带 hash 的

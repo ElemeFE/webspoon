@@ -16,6 +16,11 @@ var getHash = file => bfs.readFile(file).then(data => {
   return sha1.digest('hex');
 });
 
+var Env = function(obj) {
+  for(let key in obj) this[key] = obj[key];
+};
+Env.prototype = process.env;
+
 
 /**
  * 收集参数
@@ -61,7 +66,7 @@ watchingList = Promise.all(
         // 只有内容变化的时候才会触发
         if(hash === newHash) return;
         var child = childProcess.exec(commandList.join('\n'), {
-          env: { src: file }
+          env: new Env({ src: file })
         });
         child.stdout.pipe(process.stdout);
         child.stderr.pipe(process.stderr);

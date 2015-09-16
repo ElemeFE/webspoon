@@ -2,19 +2,32 @@
 
 import glob from 'glob';
 import bfs from 'babel-fs';
+import http from 'http';
 
 
 /**
  * 通用声明
 **/
 
-
 var matchUsemin = string => {
   var file = /file\s*=\s*"(.*?)"|$/.exec(string)[1];
   var href = /(?:href|src)\s*=\s*"(.*?)"|$/.exec(string)[1];
-  if(file === void 0 && href) file = href.replace(/^\//, '');
+  if(file === void 0 && href) file = href.replace(/^\/(?!\/)/, '');
+  if(/^\/\//.test(file)) file = 'http:' + file;
   return { file, href };
 };
+
+var loadRemoteData = url => {
+  return new Promise((resolve, reject) => {
+    http.get(url, res => {
+      var buffers = [];
+      res.on('data', data => buffers.push(data));
+      res.on('end', () => resolve(Buffer.concat(buffers)));
+      res.on('error', reject);
+    });
+  });
+};
+
 
 /**
  * 主过程
@@ -47,11 +60,13 @@ Promise.resolve(process.argv.slice(2)).then(args => {
         var tagMatcher = /<(?:script|link)([\s\S]*?)>/ig;
         while(tagMatcher.exec(content)) {
           let item = matchUsemin(RegExp.$1);
-          list.push(bfs.readFile(item.file).then(data => {
+          let loader =/^http:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file);
+          loader = loader.then(data => {
             // 将 css 转换成 js，并和其他 JS 一起合并起来
             if(!/\.css$/.test(item.file)) return data;
             return `document.write(${JSON.stringify('<style>' + data + '</style>')});`;
-          }));
+          });
+          list.push(loader);
         }
         // 保存文件
         var task = Promise.all(list).then(list => bfs.writeFile(configs.file, list.join('')));

@@ -1,3 +1,8 @@
+default: build clean copy usemin
+
+build:
+	@cd .. && npm run prepublish
+
 clean:
 	@rm -rf dist
 
@@ -7,5 +12,3 @@ copy:
 
 usemin:
 	@../bin/usemin.js dist/*.html
-
-build: clean copy usemin

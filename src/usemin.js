@@ -63,8 +63,11 @@ Promise.resolve(process.argv.slice(2)).then(args => {
           let loader =/^http:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file);
           loader = loader.then(data => {
             // 将 css 转换成 js，并和其他 JS 一起合并起来
-            if(!/\.css$/.test(item.file)) return data;
-            return `document.write(${JSON.stringify('<style>' + data + '</style>')});`;
+            if(/\.css$/.test(item.file)) {
+              data = `document.write(${JSON.stringify('<style>' + data + '</style>')});`;
+            }
+            // 为末尾不是 \n 的文件补上，否则 join 的时候可能因为上一个文件尾的单行注释而出问题
+            return data.toString().replace(/[^\n]$/, '$&\n');
           });
           list.push(loader);
         }

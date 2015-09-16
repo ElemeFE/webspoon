@@ -1,0 +1,15 @@
+<style>
+iframe { border: 0; height: 64px; }
+</style>
+<table>
+<script>
+for(var i = 1; i <= 4; i++) {
+  document.write(`
+    <tr>
+      <td><h1>test${i}：<h1></td>
+      <td><iframe src="dist/test${i}.html"></iframe></td>
+    </tr>
+  `);
+}
+</script>
+</table>

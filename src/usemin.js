@@ -3,6 +3,7 @@
 import glob from 'glob';
 import bfs from 'babel-fs';
 import http from 'http';
+import UglifyJS from 'uglify-js';
 
 
 /**
@@ -72,7 +73,10 @@ Promise.resolve(process.argv.slice(2)).then(args => {
           list.push(loader);
         }
         // 保存文件
-        var task = Promise.all(list).then(list => bfs.writeFile(configs.file, list.join('')));
+        var task = Promise.all(list).then(list => {
+          var result = UglifyJS.minify(list.join(''), { fromString: true });
+          bfs.writeFile(configs.file, result.code);
+        });
         // 保存任务并替换字符串
         tasks.push(task);
         return `<script src="${configs.href}"></script>`;

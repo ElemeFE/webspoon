@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import bfs from 'babel-fs';
+import path from 'path';
 import glob from 'glob';
 import crypto from 'crypto';
 import childProcess from 'child_process';
@@ -9,6 +10,8 @@ import childProcess from 'child_process';
 /**
  * 声明
 **/
+
+var watchingSet = new Set();
 
 var getHash = file => bfs.readFile(file).then(data => {
   let sha1 = crypto.createHash('sha1');
@@ -29,18 +32,56 @@ var trigger = file => {
   child.stderr.pipe(process.stderr);
 };
 
-var watch = file => {
-  var hash;
-  // 如果不是文件则什么也不做
-  bfs.watchFile(file, { interval: 500 }, (state) => {
-    if(!state.isFile()) return;
-    getHash(file).then(newHash => {
-      // 只有内容变化的时候才会触发
-      if(hash === newHash) return;
-      trigger(file);
-      hash = newHash;
+var watchFile = file => {
+  return getHash(file).then(hash => {
+    bfs.watchFile(file, { interval: 500 }, () => {
+      getHash(file).then(newHash => {
+        // 只有内容变化的时候才会触发
+        if(hash === newHash) return;
+        trigger(file);
+        hash = newHash;
+      }, () => {}).catch(e => console.error(e.stack));
     });
   });
+};
+
+var watchDirectory = directory => {
+  return bfs.readdir(directory).then(list => {
+    list = new Set(list);
+    return bfs.watchFile(directory, { interval: 500 }, () => {
+      // 目录变化时将新增的文件加入 watch 列表
+      bfs.readdir(directory).then(newList => {
+        // 检测新增
+        newList.forEach(name => {
+          if(list.has(name)) return;
+          var file = path.join(directory, name);
+          trigger(file);
+          watch(file);
+        });
+        // 检测删除
+        newList = new Set(newList);
+        list.forEach(name => {
+          if(newList.has(name)) return;
+          trigger(path.join(directory, name));
+        });
+        list = newList;
+      }, () => {}).catch(e => console.error(e.stack));
+    });
+  });
+};
+
+var watch = file => {
+  var hash;
+  if(watchingSet.has(file)) return;
+  watchingSet.add(file);
+  bfs.stat(file).then(state => {
+    switch(true) {
+      case state.isFile():
+        return watchFile(file);
+      case state.isDirectory():
+        return watchDirectory(file);
+    };
+  }).catch(e => console.error(e.stack));
 };
 
 
@@ -80,5 +121,5 @@ watchingList = Promise.all(
 
 // 错误处理
 .catch(error => {
-  console.error(error);
+  console.error(error.stack);
 });

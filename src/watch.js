@@ -21,6 +21,28 @@ var Env = function(obj) {
 };
 Env.prototype = process.env;
 
+var trigger = file => {
+  var child = childProcess.exec(commandList.join('\n'), {
+    env: new Env({ src: file })
+  });
+  child.stdout.pipe(process.stdout);
+  child.stderr.pipe(process.stderr);
+};
+
+var watch = file => {
+  var hash;
+  // 如果不是文件则什么也不做
+  bfs.watchFile(file, { interval: 500 }, (state) => {
+    if(!state.isFile()) return;
+    getHash(file).then(newHash => {
+      // 只有内容变化的时候才会触发
+      if(hash === newHash) return;
+      trigger(file);
+      hash = newHash;
+    });
+  });
+};
+
 
 /**
  * 收集参数
@@ -54,27 +76,7 @@ watchingList = Promise.all(
 ).then(list => [].concat(...list))
 
 // watch 每一个文件
-.then(list => Promise.all(list.map(file => {
-  bfs.stat(file).then(state => {
-    if(!state.isFile()) return;
-    return getHash(file);
-  }).then(hash => {
-    // 如果不是文件则什么也不做
-    if(!hash) return;
-    bfs.watchFile(file, { interval: 500 }, () => {
-      getHash(file).then(newHash => {
-        // 只有内容变化的时候才会触发
-        if(hash === newHash) return;
-        var child = childProcess.exec(commandList.join('\n'), {
-          env: new Env({ src: file })
-        });
-        child.stdout.pipe(process.stdout);
-        child.stderr.pipe(process.stderr);
-        hash = newHash;
-      });
-    });
-  });
-})))
+.then(list => Promise.all(list.map(watch)))
 
 // 错误处理
 .catch(error => {

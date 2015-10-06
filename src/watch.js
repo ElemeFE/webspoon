@@ -48,6 +48,7 @@ var watchFile = file => {
 var watchDirectory = directory => {
   return bfs.readdir(directory).then(list => {
     list = new Set(list);
+    list.forEach(name => watch(path.join(directory, name)));
     return bfs.watchFile(directory, { interval: 500 }, () => {
       // 目录变化时将新增的文件加入 watch 列表
       bfs.readdir(directory).then(newList => {

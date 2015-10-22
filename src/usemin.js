@@ -61,7 +61,7 @@ Promise.resolve(process.argv.slice(2)).then(args => {
         var tagMatcher = /<(?:script|link)([\s\S]*?)>/ig;
         while(tagMatcher.exec(content)) {
           let item = matchUsemin(RegExp.$1);
-          let loader =/^http:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file);
+          let loader =/^http:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file, 'utf8');
           loader = loader.then(data => {
             // 将 css 转换成 js，并和其他 JS 一起合并起来
             if(/\.css$/.test(item.file)) {

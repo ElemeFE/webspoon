@@ -17,6 +17,7 @@
   "author": "YanagiEiichi",
   "license": "MIT",
   "dependencies": {
+    "argollector": "^1.0.0",
     "babel-fs": "^1.0.2",
     "glob": "^5.0.14",
     "uglify-js": "^2.4.24"

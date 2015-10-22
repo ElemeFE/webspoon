@@ -80,3 +80,22 @@ exec 参数用于指定监视到文件变化后需要执行的脚本。
 注：
   1. 只有当文件内容有变化时才会触发。
   2. 通配符初始解析，这意味着开始 watch 之后才创建的文件不会被 watch 到。
+
+
+##### webspoon-pack
+
+用于将静态模板打包成 js 文件
+
+```bash
+webspoon-pack <FileList> -moduleName <moduleName> -regexp <Regexp> -replacement <Replacement>
+```
+
+三个可选参数
+
+* `-moduleName` 模块名，UMD 的模块名
+* `-regexp` 用于替换文件路径的正则
+* `-replacement` 替换的目标字符串
+
+注：
+  1. moduleName 缺省值为 templates
+  2. 此处使用 js 的正则，并非 sed

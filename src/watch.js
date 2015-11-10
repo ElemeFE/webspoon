@@ -5,6 +5,7 @@ import path from 'path';
 import glob from 'glob';
 import crypto from 'crypto';
 import childProcess from 'child_process';
+import argollector from 'argollector';
 
 
 /**
@@ -90,18 +91,9 @@ var watch = file => {
  * 收集参数
 **/
 
-var watchingList = [];
-var commandList = [];
-process.argv.slice(2).reduce((base, item) => {
-  switch(item) {
-    case '-target': return watchingList;
-    case '-exec': return commandList;
-    default:
-      if(!base) return base;
-      base.push(item);
-      return base;
-  }
-}, null);
+var watchingList = argollector['-target'] || [];
+var commandList = argollector['-exec'] || [];
+
 
 
 /**

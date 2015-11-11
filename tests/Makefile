@@ -1,7 +1,7 @@
 default: update build
 
 update:
-	@cd .. && npm run prepublish
+	@cd .. && make build
 
 build: clean copy pack usemin rev
 

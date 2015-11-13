@@ -97,5 +97,41 @@ webspoon-pack <FileList> -moduleName <moduleName> -regexp <Regexp> -replacement 
 * `-replacement` 替换的目标字符串
 
 注：
-  1. moduleName 缺省值为 templates
-  2. 此处使用 js 的正则，并非 sed
+  1. moduleName 缺省值为 templates。
+  2. 此处使用 js 的正则，并非 sed。
+
+
+##### webspoon-wildcard
+
+用于解析 html 文件中 SCRIPT/LINK 元素的 src/href 属性中的通配符。
+
+```bash
+webspoon-wildcard <FileList>
+```
+
+html 文件中这样设置通配符
+
+```html
+<script wildcard="dist/**/*.js"></script>
+<link rel="stylesheet" wildcard="dist/**/*.css" />
+```
+
+将得到大概这样的结果
+
+```html
+<script src="/dist/a.js" file="dist/a.js"></script><script src="/dist/b.js" file="dist/b.js"></script>
+<link rel="stylesheet" href="/dist/a.css" href="dist/a.css" /><link rel="stylesheet" href="/dist/b.css" file="dist/b.css" />
+```
+
+生成结果中标签上的 `file` 属性可以通过 webspoon-usemin 处理掉。
+
+元素上除了 `wildcard` 属性外还有 `root`、`regexp`、`replacement` 三个可选属性。
+
+* `root` 指定一个站点根目录，用于调整结果中 `src`/`href` 的路径。
+* `regexp` 用于替换文件路径的正则
+* `replacement` 替换的目标字符串
+
+注：
+  1. 替换步骤在 root 解析完毕后执行。
+  2. 此处使用 js 的正则，并非 sed。
+  3. 操作的文件更新后会覆盖原始文件，如果不希望被覆盖请先复制出来。

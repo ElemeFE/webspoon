@@ -5,6 +5,9 @@ import glob from 'glob';
 import bfs from 'babel-fs';
 import argollector from 'argollector';
 
+let globPromise = fileName => new Promise((resolve, reject) => {
+  glob(fileName, (error, list) => error ? reject(error) : resolve(list));
+});
 
 /**
  * 主过程
@@ -14,8 +17,8 @@ import argollector from 'argollector';
 Promise
 
   .all([
-    Promise.all(argollector['-base']).then(list => [].concat(...list)),
-    Promise.all(argollector['-static']).then(list => [].concat(...list))
+    Promise.all(argollector['-base'].map(globPromise)).then(list => [].concat(...list)),
+    Promise.all(argollector['-static'].map(globPromise)).then(list => [].concat(...list))
   ])
 
   // 将 staticList 的文件重命名为带 hash 的

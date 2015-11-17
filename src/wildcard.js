@@ -3,6 +3,7 @@
 import glob from 'glob';
 import bfs from 'babel-fs';
 import argollector from 'argollector';
+import capacitance from 'capacitance';
 import path from 'path';
 
 
@@ -24,7 +25,7 @@ const re = new RegExp([
   '.*?(?:>\s*</script>|>)'
 ].join(''), 'g');
 
-const wildcard = data => {
+const replaceWildcard = data => {
   var taskList = [];
   for(let matches; matches = re.exec(data);) {
     let [ , type, wildcard, root, regexp, replacement ] = matches;
@@ -54,15 +55,23 @@ Promise
   // 组织参数，处理通配符
   .all(argollector.slice(0).concat(argollector['-files'] || []).map(wildcard => glop(wildcard)))
   .then(list => [].concat(...list))
-  // 读文件
-  .then(list => Promise.all(list.map(path => {
-    return bfs.readFile(path).then(data => ({ path, data: String(data) }));
-  })))
-  // 处理通配符
-  .then(list => Promise.all(list.map(item => {
-    return wildcard(item.data).then(data => {
-      return bfs.writeFile(item.path, data);
-    });
-  })))
+  .then(list => {
+    if(list.length) {
+      // 对传入的文件执行 wildcard
+      return Promise.all(list.map(path => {
+        return bfs.readFile(path).then(data => ({ path, data: String(data) }));
+      })).then(list => Promise.all(list.map(item => {
+        return replaceWildcard(item.data).then(data => bfs.writeFile(item.path, data));
+      })));
+    } else {
+      // 对 stdin 的数据执行 wildcard
+      return process.stdin.pipe(new capacitance()).then(data => {
+        return replaceWildcard(String(data)).then(data => {
+          if(process.stdout.write(data)) return;
+          process.stdout.on('drain', () => process.exit());
+        });
+      });
+    }
+  })
   // 捕获错误
   .catch(console.error);

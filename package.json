@@ -1,6 +1,6 @@
 {
   "name": "webspoon",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "这是一个 Web 前端工程化的工具包。",
   "main": "index.js",
   "directories": {
@@ -13,7 +13,8 @@
     "webspoon-usemin": "./bin/usemin.js",
     "webspoon-rev": "./bin/rev.js",
     "webspoon-watch": "./bin/watch.js",
-    "webspoon-pack": "./bin/pack.js"
+    "webspoon-pack": "./bin/pack.js",
+    "webspoon-wildcard": "./bin/wildcard.js"
   },
   "author": "YanagiEiichi",
   "license": "MIT",

@@ -22,6 +22,7 @@ Promise
   .then(list => [].concat(...list))
   // 读文件
   .then(list => {
+    list.sort();
     var result = {};
     return Promise.all(list.map(path => {
       var key = path.replace(regexp, replacement);

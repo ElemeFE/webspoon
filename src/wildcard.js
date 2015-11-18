@@ -57,6 +57,7 @@ Promise
   .then(list => [].concat(...list))
   .then(list => {
     if(list.length) {
+      list.sort();
       // 对传入的文件执行 wildcard
       return Promise.all(list.map(path => {
         return bfs.readFile(path).then(data => ({ path, data: String(data) }));

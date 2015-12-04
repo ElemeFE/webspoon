@@ -12,6 +12,22 @@ var regexp = new RegExp(argollector['-regexp'] && argollector['-regexp'][0] || '
 var replacement = argollector['-replacement'] && argollector['-replacement'][0] || '';
 var moduleName = argollector['-moduleName'] && argollector['-moduleName'][0] || 'templates';
 
+// 这坨代码我自己都觉得烂，然而有更好的写法么？
+// 目的是对文件列表做一个排序，并且让同级的文件总是优先于目录
+var sortFileList = list => {
+  for(let i = 0; i < list.length; i++) list[i] = list[i].split(/\//g);
+  list.sort((a, b) => {
+    let length = Math.max(a.length, b.length);
+    for(let i = 0; i < length; i++) {
+      let fileFirst = !!a[i + 1] - !!b[i + 1];
+      if(fileFirst) return fileFirst;
+      let diff = (a[i] || '').localeCompare(b[i] || '');
+      if(diff) return diff;
+    }
+  });
+  for(let i = 0; i < list.length; i++) list[i] = list[i].join('/');
+};
+
 Promise
   // 组织参数，处理通配符
   .all(argollector.slice(0).concat(argollector['-files'] || []).map(
@@ -22,7 +38,7 @@ Promise
   .then(list => [].concat(...list))
   // 读文件
   .then(list => {
-    list.sort();
+    sortFileList(list);
     var result = {};
     return Promise.all(list.map(path => {
       var key = path.replace(regexp, replacement);

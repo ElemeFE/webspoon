@@ -17,6 +17,7 @@ const root = argollector['-root'] && argollector['-root'][0] || './';
 
 // 创建正则，用于从 script/link 中取出各种属性
 const re = new RegExp([
+  '(\\s*)',
   '<(script|link)\\s',
   '(?=.*wildcard="(.*?)")', // require
   '(?=.*root="(.*?)"|)', // optional
@@ -28,16 +29,25 @@ const re = new RegExp([
 const replaceWildcard = data => {
   var taskList = [];
   for(let matches; matches = re.exec(data);) {
-    let [ , type, wildcard, root, regexp, replacement ] = matches;
+    let [ , space, type, wildcard, root, regexp, replacement ] = matches;
     taskList.push(glop(wildcard).then(list => list.map(src => {
       let href = path.resolve(src).replace(path.resolve(root || '.'), '');
       if(regexp) href = href.replace(new RegExp(regexp), replacement || '');
+      let isSameRoot = href === '/' + src;
+      var result = [];
       switch(type) {
         case 'script':
-          return `<script src="${href}" file="${src}"></script>`;
+          result.push(`${space}<script src="${href}"`);
+          if(!isSameRoot) result.push(` file="${src}"`);
+          result.push(`></script>`);
+          break;
         case 'link':
-          return `<link rel="stylesheet" href="${href}" file="${src}" />`;
+          result.push(`${space}<link rel="stylesheet" href="${href}"`);
+          if(!isSameRoot) result.push(` file="${src}"`);
+          result.push(` />`);
+          break;
       }
+      return result.join('');
     })));
   }
   return Promise.all(taskList).then(list => {

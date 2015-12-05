@@ -20,7 +20,6 @@ pack:
 
 wildcard:
 	@../bin/wildcard.js 'dist/**/test7.html'
-	@../bin/wildcard.js 'dist/**/test8.html'
 
 rev:
 	@../bin/rev.js -base 'dist/test5.html' -base 'dist/dist5.js' -static 'dist/dist5.js'

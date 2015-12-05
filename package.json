@@ -21,8 +21,10 @@
   "dependencies": {
     "argollector": "^1.0.0",
     "babel-fs": "^1.0.2",
+    "capacitance": "^1.0.0",
     "glob": "^5.0.14",
-    "uglify-js": "^2.4.24"
+    "uglify-js": "^2.6.1",
+    "clean-css": "^3.4.8"
   },
   "devDependencies": {
     "babel": "^5.8.3"

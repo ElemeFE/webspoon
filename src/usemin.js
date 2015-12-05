@@ -80,12 +80,10 @@ Promise
                 } else if (!item.file.endsWith('.js')) {
                   throw new Error('Not supported source file type: ' + item.file);
                 }
-                // 为末尾不是 \n 的文件补上，否则 join 的时候可能因为上一个文件尾的单行注释而出问题
-                return data.toString().replace(/[^\n]$/, '$&\n');
+                return data.toString();
               });
             } else if (configs.file.endsWith('.css')) {
               if (item.file.endsWith('.css')) {
-                // css 文件不加换行也是安全的
                 loader = loader.then(data => data.toString());
               } else {
                 throw new Error('Not supported source file type: ' + item.file);
@@ -97,12 +95,11 @@ Promise
           }
           // 保存文件
           var task = Promise.all(list).then(list => {
-            var result = list.join('');
-            if (configs.file.endsWith('.js')) {
-              result = UglifyJS.minify(result, { fromString: true }).code;
-            } else {
-              result = new CleanCss().minify(result).styles;
-            }
+            var result = configs.file.endsWith('.js')
+              ? UglifyJS.minify(list, { fromString: true }).code
+              : new CleanCss().minify(list.reduce((previous, current, index) =>
+                  (previous[index] = { styles: current }, previous), {})).styles;
+
             bfs.writeFile(configs.file, result);
           });
           // 保存任务并替换字符串

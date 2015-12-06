@@ -6,10 +6,28 @@ import argollector from 'argollector';
 import capacitance from 'capacitance';
 import path from 'path';
 
+// 这坨代码我自己都觉得烂，然而有更好的写法么？
+// 目的是对文件列表做一个排序，并且让同级的文件总是优先于目录
+var sortFileList = list => {
+  for(let i = 0; i < list.length; i++) list[i] = list[i].split(/\//g);
+  list.sort((a, b) => {
+    let length = Math.max(a.length, b.length);
+    for(let i = 0; i < length; i++) {
+      let fileFirst = !!a[i + 1] - !!b[i + 1];
+      if(fileFirst) return fileFirst;
+      let diff = (a[i] || '').localeCompare(b[i] || '');
+      if(diff) return diff;
+    }
+  });
+  for(let i = 0; i < list.length; i++) list[i] = list[i].join('/');
+};
 
 const glop = (...args) => {
   return new Promise((resolve, reject) => {
     glob(...args, (error, list) => error ? reject(error) : resolve(list));
+  }).then(list => {
+    sortFileList(list);
+    return list;
   });
 };
 
@@ -60,14 +78,12 @@ const replaceWildcard = data => {
 /**
  * 主过程
 **/
-
 Promise
   // 组织参数，处理通配符
   .all(argollector.slice(0).concat(argollector['-files'] || []).map(wildcard => glop(wildcard)))
   .then(list => [].concat(...list))
   .then(list => {
     if(list.length) {
-      list.sort();
       // 对传入的文件执行 wildcard
       return Promise.all(list.map(path => {
         return bfs.readFile(path).then(data => ({ path, data: String(data) }));

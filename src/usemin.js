@@ -7,7 +7,6 @@ import UglifyJS from 'uglify-js';
 import argollector from 'argollector';
 import CleanCss from 'clean-css';
 
-require('./polyfill');
 
 /**
  * 通用声明
@@ -73,18 +72,18 @@ Promise
             let item = matchUsemin(RegExp.$1);
             let loader =/^http:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file, 'utf8');
 
-            if (configs.file.endsWith('.js')) {
+            if (configs.file.match(/\.js$/)) {
               loader = loader.then(data => {
                 // 将 css 转换成 js，并和其他 JS 一起合并起来
                 if(/\.css$/.test(item.file)) {
                   data = `document.write(${JSON.stringify('<style>' + data + '</style>')});`;
-                } else if (!item.file.endsWith('.js')) {
+                } else if (!item.file.match(/\.js$/)) {
                   throw new Error('Not supported source file type: ' + item.file);
                 }
                 return data.toString();
               });
-            } else if (configs.file.endsWith('.css')) {
-              if (item.file.endsWith('.css')) {
+            } else if (configs.file.match(/\.css$/)) {
+              if (item.file.match(/\.css$/)) {
                 loader = loader.then(data => data.toString());
               } else {
                 throw new Error('Not supported source file type: ' + item.file);
@@ -96,7 +95,7 @@ Promise
           }
           // 保存文件
           var task = Promise.all(list).then(list => {
-            var result = configs.file.endsWith('.js')
+            var result = configs.file.match(/\.js$/)
               ? UglifyJS.minify(list, { fromString: true }).code
               : new CleanCss().minify(list.reduce((previous, current, index) =>
                   (previous[index] = { styles: current }, previous), {})).styles;
@@ -105,7 +104,7 @@ Promise
           });
           // 保存任务并替换字符串
           tasks.push(task);
-          return configs.file.endsWith('.js')
+          return configs.file.match(/\.js$/)
             ? `<script src="${configs.href}"></script>`
             : `<link href="${configs.href}" rel="stylesheet" />`;
         });

@@ -7,6 +7,7 @@ import UglifyJS from 'uglify-js';
 import argollector from 'argollector';
 import CleanCss from 'clean-css';
 
+require('./polyfill');
 
 /**
  * 通用声明

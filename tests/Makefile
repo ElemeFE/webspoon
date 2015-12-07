@@ -3,7 +3,7 @@ default: update build
 update:
 	@cd .. && make build
 
-build: clean copy pack wildcard usemin rev
+build: clean copy pack wildcard usemin rev check
 
 clean:
 	@rm -rf dist
@@ -21,6 +21,8 @@ pack:
 wildcard:
 	@../bin/wildcard.js 'dist/**/test7.html'
 
-
 rev:
 	@../bin/rev.js -base 'dist/test5.html' -base 'dist/dist5.js' -static 'dist/dist5.js'
+
+check:
+	@open index.html

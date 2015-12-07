@@ -96,9 +96,8 @@ Promise
           // 保存文件
           var task = Promise.all(list).then(list => {
             var result = configs.file.match(/\.js$/)
-              ? UglifyJS.minify(list, { fromString: true }).code
-              : new CleanCss().minify(list.reduce((previous, current, index) =>
-                  (previous[index] = { styles: current }, previous), {})).styles;
+              ? UglifyJS.minify(list.join('\n;'), { fromString: true }).code
+              : new CleanCss().minify(list.join('\n')).styles;
 
             bfs.writeFile(configs.file, result);
           });

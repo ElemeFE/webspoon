@@ -1,3 +1,3 @@
-onload = function() {
-  document.body.innerHTML = str;
-};
+(onload = function() {
+  document.body.textContent = getStr();
+})

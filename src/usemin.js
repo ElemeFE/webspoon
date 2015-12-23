@@ -81,10 +81,17 @@ Promise
           // 从 HTML 片段中搜索 href 和 filte
           var list = [];
           while (tagMatcher.exec(content)) list.push(matchUsemin(RegExp.$1));
-          var resources = JSON.stringify(list);
+          var resources = JSON.stringify(list.map(item => item.file));
           // 检测重复资源
           if(cache[configs.file]) {
-            if(cache[configs.file].resources !== resources) throw new Error('The dist file ${configs.file} conflicted');
+            if(cache[configs.file].resources !== resources) {
+              throw new Error([
+                `The dist file ${configs.file} has conflict`,
+                '',
+                'A = ' + cache[configs.file].resources,
+                'B = ' + resources
+              ].join('\n'));
+            }
             return cache[configs.file].output;
           }
           // 创建缓存
@@ -139,6 +146,6 @@ Promise
 
   // 错误处理到 stderr
   .catch(error => {
-    process.stderr.write(error.stack + '\n');
+    process.stderr.write('[31m\n' + error.stack + '\n[0m');
     process.exit(1);
   });

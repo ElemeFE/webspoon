@@ -20,8 +20,10 @@ var matchUsemin = string => {
   return { file, href };
 };
 
+var loadRemoteDataCache = {};
 var loadRemoteData = url => {
-  return new Promise((resolve, reject) => {
+  if(loadRemoteDataCache[url]) return;
+  return loadRemoteDataCache[url] = new Promise((resolve, reject) => {
     http.get(url, res => {
       var buffers = [];
       res.on('data', data => buffers.push(data));

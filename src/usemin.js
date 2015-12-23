@@ -26,7 +26,7 @@ var matchUsemin = string => {
 
 var loadRemoteDataCache = {};
 var loadRemoteData = url => {
-  if (loadRemoteDataCache[url]) return;
+  if (loadRemoteDataCache[url]) return loadRemoteDataCache[url];
   return loadRemoteDataCache[url] = new Promise((resolve, reject) => {
     http.get(url, res => {
       var buffers = [];

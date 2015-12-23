@@ -61,6 +61,7 @@ Promise
   // 打包 js 和 css 文件
   .then(list => {
     var tasks = [];
+    var cache = {};
     return Promise.all(list.map(pathname => {
       // 此处不使用 Promise 扁平化是因为文件数据量可能很大，这样可以避免全部文件一起读入内存使内存占用过高
       return bfs.readFile(pathname).then(data => {
@@ -70,10 +71,26 @@ Promise
           if (!configs.file || !configs.href) {
             throw new Error('Missing essential attributes for <!-- build --> blocks:\n' + $0);
           }
-          // 从 HTML 片段中搜索并读入引用的文件
+          // 计算 output
+          var output;
+          if (/\.js$/.test(configs.file)) {
+            output = `<script src="${configs.href}"></script>`;
+          } else {
+            output = `<link href="${configs.href}" rel="stylesheet" />`;
+          }
+          // 从 HTML 片段中搜索 href 和 filte
           var list = [];
-          while (tagMatcher.exec(content)) {
-            let item = matchUsemin(RegExp.$1);
+          while (tagMatcher.exec(content)) list.push(matchUsemin(RegExp.$1));
+          var resources = JSON.stringify(list);
+          // 检测重复资源
+          if(cache[configs.file]) {
+            if(cache[configs.file].resources !== resources) throw new Error('The dist file ${configs.file} conflicted');
+            return cache[configs.file].output;
+          }
+          // 创建缓存
+          cache[configs.file] = { resources, output };
+          // 读入 list
+          list.forEach((item, index) => {
             let loader =/^http:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file, 'utf8');
             if (configs.file.match(/\.js$/)) {
               loader = loader.then(data => {
@@ -94,8 +111,8 @@ Promise
             } else {
               throw new Error('Not supported target file type: ' + configs.file)
             }
-            list.push(loader);
-          }
+            list[index] = loader;
+          });
           // 保存文件
           var task = Promise.all(list).then(list => {
             var result;
@@ -108,11 +125,7 @@ Promise
           });
           // 保存任务并替换字符串
           tasks.push(task);
-          if (/\.js$/.test(configs.file)) {
-            return `<script src="${configs.href}"></script>`;
-          } else {
-            return `<link href="${configs.href}" rel="stylesheet" />`;
-          }
+          return output;
         });
         return bfs.writeFile(pathname, data);
       });

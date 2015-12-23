@@ -119,8 +119,10 @@ html 文件中这样设置通配符
 将得到大概这样的结果
 
 ```html
-<script src="/dist/a.js" file="dist/a.js"></script><script src="/dist/b.js" file="dist/b.js"></script>
-<link rel="stylesheet" href="/dist/a.css" href="dist/a.css" /><link rel="stylesheet" href="/dist/b.css" file="dist/b.css" />
+<script src="/dist/a.js"></script>
+<script src="/dist/b.js"></script>
+<link rel="stylesheet" href="/dist/a.css" />
+<link rel="stylesheet" href="/dist/b.css" />
 ```
 
 生成结果中标签上的 `file` 属性可以通过 webspoon-usemin 处理掉。

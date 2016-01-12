@@ -20,7 +20,7 @@ sudo npm install webspoon -g
 
 ##### webspoon-usemin
 
-用于合并 html 文件中特殊注释内的静态资源。
+用于合并压缩 html 文件中特殊注释块内的静态资源。
 
 ```bash
 webspoon-usemin <FileList>
@@ -63,7 +63,7 @@ static 列表指定的是静态文件，它会根据其自身内容重命名到�
 
 ##### webspoon-watch
 
-用于给静态资的文件名中加入 hash，同时替换引用文件的引用路径。
+用于监视项目文件，在文件变化时执行相应的命令。
 
 ```bash
 webspoon-watch -target <FileList> -exec <Command>

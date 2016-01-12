@@ -122,13 +122,18 @@ Promise
           });
           // 保存文件
           var task = Promise.all(list).then(list => {
-            var result;
             if (/\.js$/.test(configs.file)) {
-              result = UglifyJS.minify(list.join('\n;'), { fromString: true }).code;
+              return UglifyJS.minify(list.join('\n;'), { fromString: true }).code;
             } else {
-              result = new CleanCss().minify(list.join('\n')).styles;
+              return new CleanCss().minify(list.join('\n')).styles;
             }
-            bfs.writeFile(configs.file, result);
+          }).then(result => bfs.writeFile(configs.file, result), error => {
+            throw new Error([
+              error.constructor.name + ': ',
+              '    on error.message: ' + error.message,
+              '    on pathname: ' + pathname,
+              '    on configs.file: ' + configs.file
+            ].join('\n'));
           });
           // 保存任务并替换字符串
           tasks.push(task);

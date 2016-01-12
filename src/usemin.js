@@ -4,9 +4,9 @@ import glob from 'glob';
 import bfs from 'babel-fs';
 import http from 'http';
 import argollector from 'argollector';
+import Capacitance from 'capacitance';
 
-import UglifyJS from 'uglify-js';
-import CleanCss from 'clean-css';
+import compressor from './compressor';
 
 
 /**
@@ -29,9 +29,7 @@ var loadRemoteData = url => {
   if (loadRemoteDataCache[url]) return loadRemoteDataCache[url];
   return loadRemoteDataCache[url] = new Promise((resolve, reject) => {
     http.get(url, res => {
-      var buffers = [];
-      res.on('data', data => buffers.push(data));
-      res.on('end', () => resolve(Buffer.concat(buffers)));
+      res.pipe(new Capacitance()).then(resolve, reject);
     }).on('error', error => {
       var { code } = error;
       if (code === 'EHOSTUNREACH') code += ' (Can\'t connect to ' + error.address + ')';
@@ -129,9 +127,9 @@ Promise
           // 保存文件
           var task = Promise.all(list).then(list => {
             if (/\.js$/.test(configs.file)) {
-              return UglifyJS.minify(list.join('\n;'), { fromString: true }).code;
+              return compressor.js(list.join('\n;'));
             } else {
-              return new CleanCss().minify(list.join('\n')).styles;
+              return compressor.css(list.join('\n'));
             }
           }).then(result => bfs.writeFile(configs.file, result), error => {
             if(typeof error === 'string') throw new Error(error);
@@ -153,7 +151,7 @@ Promise
 
   // 成功
   .then(data => {
-    // TODO
+    process.exit(0);
   })
 
   // 错误处理到 stderr
@@ -161,3 +159,4 @@ Promise
     process.stderr.write('[31m\n' + error.stack + '\n[0m');
     process.exit(1);
   });
+

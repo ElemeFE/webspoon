@@ -32,7 +32,13 @@ var loadRemoteData = url => {
       var buffers = [];
       res.on('data', data => buffers.push(data));
       res.on('end', () => resolve(Buffer.concat(buffers)));
-      res.on('error', reject);
+    }).on('error', error => {
+      var { code } = error;
+      if (code === 'EHOSTUNREACH') code += ' (Can\'t connect to ' + error.address + ')';
+      reject([
+        code,
+        '    at loadRemoteData("' + url + '")'
+      ].join('\n'));
     });
   });
 };
@@ -128,6 +134,7 @@ Promise
               return new CleanCss().minify(list.join('\n')).styles;
             }
           }).then(result => bfs.writeFile(configs.file, result), error => {
+            if(typeof error === 'string') throw new Error(error);
             throw new Error([
               error.constructor.name + ': ',
               '    on error.message: ' + error.message,

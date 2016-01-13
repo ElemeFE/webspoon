@@ -4,7 +4,7 @@ import path from 'path';
 
 cluster.setupMaster({ exec: path.join(__dirname, './compressor.child.js') });
 
-module.exports = new class {
+export default new class {
   constructor() {
     this.inc = 0;
     this.heap = {};

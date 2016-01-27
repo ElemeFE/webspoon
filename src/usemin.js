@@ -3,6 +3,7 @@
 import glob from 'glob';
 import bfs from 'babel-fs';
 import http from 'http';
+import https from 'https';
 import argollector from 'argollector';
 import Capacitance from 'capacitance';
 
@@ -28,8 +29,8 @@ var loadRemoteDataCache = {};
 var loadRemoteData = url => {
   if (loadRemoteDataCache[url]) return loadRemoteDataCache[url];
   return loadRemoteDataCache[url] = new Promise((resolve, reject) => {
-    http.get(url, res => {
-      res.pipe(new Capacitance()).then(resolve, reject);
+    (/^https/.test(url) ? https : http).get(url, res => {
+      res.pipe(new Capacitance()).then(String).then(resolve, reject);
     }).on('error', error => {
       var { code } = error;
       if (code === 'EHOSTUNREACH') code += ' (Can\'t connect to ' + error.address + ')';
@@ -102,9 +103,12 @@ Promise
           cache[configs.file] = { resources, output };
           // 读入 list
           list.forEach((item, index) => {
-            let loader =/^http:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file, 'utf8');
+            let loader =/^https?:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file, 'utf8');
             if (configs.file.match(/\.js$/)) {
               loader = loader.then(data => {
+                // 压缩 js 里面的 css
+                return /\.css$/.test(item.file) ? compressor.css(data) : data;
+              }).then(data => {
                 // 将 css 转换成 js，并和其他 JS 一起合并起来
                 if (/\.css$/.test(item.file)) {
                   data = `document.write(${JSON.stringify('<style>' + data + '</style>')});`;
@@ -127,11 +131,13 @@ Promise
           // 保存文件
           var task = Promise.all(list).then(list => {
             if (/\.js$/.test(configs.file)) {
-              return compressor.js(list.join('\n;'));
+              return compressor.js(list.join(';\n'));
             } else {
               return compressor.css(list.join('\n'));
             }
-          }).then(result => bfs.writeFile(configs.file, result), error => {
+          }).then(result => {
+            return bfs.writeFile(configs.file, result);
+          }, error => {
             if(typeof error === 'string') throw new Error(error);
             throw new Error([
               error.constructor.name + ': ',

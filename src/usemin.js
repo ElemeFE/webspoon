@@ -106,6 +106,8 @@ Promise
             let loader =/^https?:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file, 'utf8');
             if (configs.file.match(/\.js$/)) {
               loader = loader.then(data => {
+                // 先不压缩，有个莫名其妙的 Bug @ 2016-01-28
+                return data;
                 // 压缩 js 里面的 css
                 return /\.css$/.test(item.file) ? compressor.css(data) : data;
               }).then(data => {

@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "prepublish": "babel src -d bin"
+    "prepublish": "make build"
   },
   "bin": {
     "webspoon-usemin": "./bin/usemin.js",

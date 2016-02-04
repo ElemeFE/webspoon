@@ -7,7 +7,7 @@ import https from 'https';
 import argollector from 'argollector';
 import Capacitance from 'capacitance';
 
-import compressor from './compressor';
+import compressor from '../lib/compressor';
 
 
 /**

@@ -15,14 +15,44 @@ import compressor from './compressor';
 **/
 
 var blockMatcher = /<!--\s*build\s([\s\S]+?)-->([\s\S]*?)<!--\s*endbuild\s*-->/g;
-var tagMatcher = /<(?:script|link)([\s\S]*?)>/ig;
+var tagMatcher = /<(?:script|link)([\s\S]*?)\/?>/ig;
+
+class Attrs {
+  toHTMLTag() {
+    let obj = JSON.parse(JSON.stringify(this));
+    let { file, href } = obj;
+    delete obj.href;
+    delete obj.file;
+    const getAttrsString = () => Object.keys(obj).map(key => `${key}="${obj[key]}"`).join(' ');
+    let result;
+    switch(String(/\.[^.]*$/.exec(file)).toLowerCase()) {
+      case '.js':
+        obj.src = href;
+        return `<script ${getAttrsString()}></script>`;
+      case '.css':
+        obj.href = href;
+        obj.rel = obj.rel || 'stylesheet'; // 默认的 rel 属性使用 stylesheet
+        return `<link ${getAttrsString()} />`;
+      default:
+        throw new Error('目前 <!-- build --> 块仅支持生成 js 和 css 文件');
+    };
+  }
+  constructor(string) {
+    for(let i, r = /([^= ]+)(?:="(.*?)")?/g; i = r.exec(string);) {
+      let [ , key, value ] = i;
+      if(value === void 0) value = key;
+      this[key] = value;
+    }
+  }
+};
 
 var matchUsemin = string => {
-  var file = /file\s*=\s*"(.*?)"|$/.exec(string)[1];
-  var href = /(?:href|src)\s*=\s*"(.*?)"|$/.exec(string)[1];
-  if (file === void 0 && href) file = href.replace(/^\/(?!\/)/, '');
-  if (/^\/\//.test(file)) file = 'http:' + file;
-  return { file, href };
+  var attrs = new Attrs(string);
+  attrs.href = attrs.href || attrs.src;
+  delete attrs.src;
+  if (attrs.file === void 0 && attrs.href) attrs.file = attrs.href.replace(/^\/(?!\/)/, '');
+  if (/^\/\//.test(attrs.file)) attrs.file = 'http:' + attrs.file;
+  return attrs;
 };
 
 var loadRemoteDataCache = {};
@@ -77,12 +107,7 @@ Promise
             throw new Error('Missing essential attributes for <!-- build --> blocks:\n' + $0);
           }
           // 计算 output
-          var output;
-          if (/\.js$/.test(configs.file)) {
-            output = `<script src="${configs.href}"></script>`;
-          } else {
-            output = `<link href="${configs.href}" rel="stylesheet" />`;
-          }
+          var output = configs.toHTMLTag();
           // 从 HTML 片段中搜索 href 和 filte
           var list = [];
           while (tagMatcher.exec(content)) list.push(matchUsemin(RegExp.$1));

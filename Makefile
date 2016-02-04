@@ -10,14 +10,21 @@ help:
 test:
 	@cd tests && make
 
-build: $(shell find src -name '*.js' | sed s/^src/bin/)
+build: $(shell find src -name '*.js' | sed 's/^src\///')
 	@# build done
 
 babel := ./node_modules/.bin/babel
-bin/%.js: src/%.js
+
+bin/%.js: src/bin/%.js
 	@echo "[1mBuild[0m [35m$<[0m to [35m$@[0m ... \c"
 	@$(babel) $< > $@
 	@chmod 755 $@
+	@echo "[32mOK[0m"
+
+lib/%.js: src/lib/%.js
+	@echo "[1mBuild[0m [35m$<[0m to [35m$@[0m ... \c"
+	@$(babel) $< > $@
+	@chmod 644 $@
 	@echo "[32mOK[0m"
 
 clean:

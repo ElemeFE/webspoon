@@ -1,3 +1,4 @@
+if(!document.currentScript.async) throw 'usemin 没有处理 async';
 onload = function() {
   if(/^dist\/dist5\.js$/.test('dist/dist5.js')) throw 'rev 没有成功';
   var h1 = document.createElement('h1');

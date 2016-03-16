@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 
 import crypto from 'crypto';
-import glob from 'glob';
 import bfs from 'babel-fs';
 import argollector from 'argollector';
 
-let globPromise = fileName => new Promise((resolve, reject) => {
-  glob(fileName, (error, list) => error ? reject(error) : resolve(list));
-});
+import globPromise from '../lib/globpromise';
 
 /**
  * 主过程

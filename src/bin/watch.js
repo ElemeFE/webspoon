@@ -2,10 +2,11 @@
 
 import bfs from 'babel-fs';
 import path from 'path';
-import glob from 'glob';
 import crypto from 'crypto';
 import childProcess from 'child_process';
 import argollector from 'argollector';
+
+import globPromise from '../lib/globpromise';
 
 
 /**
@@ -101,13 +102,7 @@ var commandList = argollector['-exec'] || [];
 **/
 
 // 处理通配符
-watchingList = Promise.all(
-  watchingList.map(pattern => new Promise((resolve, reject) => {
-    glob(pattern, (error, list) => {
-      return error ? reject(error) : resolve(list);
-    });
-  }))
-).then(list => [].concat(...list))
+watchingList = Promise.all(watchingList.map(globPromise)).then(list => [].concat(...list))
 
 // watch 每一个文件
 .then(list => Promise.all(list.map(watch)))

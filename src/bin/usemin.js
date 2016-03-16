@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
-import glob from 'glob';
 import bfs from 'babel-fs';
 import http from 'http';
 import https from 'https';
 import argollector from 'argollector';
 import Capacitance from 'capacitance';
+
+import globPromise from '../lib/globpromise';
 
 import compressor from '../lib/compressor';
 
@@ -81,11 +82,7 @@ var loadRemoteData = url => {
 Promise
 
   // 组织参数，处理通配符
-  .all(argollector.slice(0).concat(argollector['--files'] || []).map(
-    fileName => new Promise((resolve, reject) => {
-      glob(fileName, (error, list) => error ? reject(error) : resolve(list));
-    })
-  ))
+  .all(argollector.slice(0).concat(argollector['--files'] || []).map(globPromise))
 
   .then(list => {
     list = [].concat(...list);

@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-import glob from 'glob';
 import bfs from 'babel-fs';
 import argollector from 'argollector';
 import capacitance from 'capacitance';
 import path from 'path';
+
+import globPromise from '../lib/globpromise';
 
 // 这坨代码我自己都觉得烂，然而有更好的写法么？
 // 目的是对文件列表做一个排序，并且让同级的文件总是优先于目录
@@ -22,14 +23,10 @@ var sortFileList = list => {
   for(let i = 0; i < list.length; i++) list[i] = list[i].join('/');
 };
 
-const glop = (...args) => {
-  return new Promise((resolve, reject) => {
-    glob(...args, (error, list) => error ? reject(error) : resolve(list));
-  }).then(list => {
-    sortFileList(list);
-    return list;
-  });
-};
+const glop = (...args) => globPromise(...args).then(list => {
+  sortFileList(list);
+  return list;
+});
 
 const root = argollector['-root'] && argollector['-root'][0] || './';
 

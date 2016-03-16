@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import glob from 'glob';
 import bfs from 'babel-fs';
 import argollector from 'argollector';
+
+import globPromise from '../lib/globpromise';
 
 /**
  * 主过程
@@ -30,11 +31,7 @@ var sortFileList = list => {
 
 Promise
   // 组织参数，处理通配符
-  .all(argollector.slice(0).concat(argollector['-files'] || []).map(
-    fileName => new Promise((resolve, reject) => {
-      glob(fileName, (error, list) => error ? reject(error) : resolve(list));
-    })
-  ))
+  .all(argollector.slice(0).concat(argollector['-files'] || []).map(globPromise))
   .then(list => [].concat(...list))
   // 读文件
   .then(list => {

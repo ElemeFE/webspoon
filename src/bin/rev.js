@@ -38,17 +38,21 @@ Promise
     // 将 staticList 转换成 map 以便使用
     var staticMap = {};
     staticList.forEach(([oldPath, newPath]) => staticMap[oldPath] = newPath);
-    // 将 staticList 中的旧路径转换成正则以便后续使用
-    staticList.forEach(args => {
-      args[0] = new RegExp('\\b' + args[0].replace(/\./g, '\\.') + '\\b', 'g');
-    });
+    // 将 staticList 中的旧路径提前转换成正则对象以提高性能
+    staticList.forEach(args => args[0] = new RegExp('\\b' + args[0].replace(/\./g, '\\.') + '\\b', 'g'));
+    // 将 baseList 中每个文件内容中包含 staticList 旧路径的东西替换成新的
     baseList.map(pathname => {
       // 自己可能被改名了？尝试从 map 中取
       pathname = staticMap[pathname] || pathname;
       // 此处不使用 Promise 扁平化是因为文件数据量可能很大，这样可以避免全部文件一起读入内存使内存占用过高
       return bfs.readFile(pathname).then(data => {
-        data = staticList.reduce((base, [oldPath, newPath]) => base.replace(oldPath, newPath), data + '');
-        return bfs.writeFile(pathname, data);
+        data += '';
+        // data 是读取到的文件内容，遍历 staticList 做一堆替换操作
+        var newData = staticList.reduce((base, [oldPath, newPath]) => base.replace(oldPath, newPath), data);
+        // 无修改，不操作
+        if (data === newData) return;
+        // 文件回写
+        return bfs.writeFile(pathname, newData);
       });
     });
   })

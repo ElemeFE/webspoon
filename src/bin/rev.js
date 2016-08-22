@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import crypto from 'crypto';
-import bfs from 'babel-fs';
 import argollector from 'argollector';
 import globPromise from '../lib/globpromise';
 
+import { readFile, writeFile, rename } from '../lib/xfs';
 
 
 /**
@@ -28,7 +28,7 @@ const revProcessor = ([baseList, staticList]) =>
       revProcessorRecursionCounter[realFilePath] = 0;
     }
     // 此处不使用 Promise 扁平化是因为文件数据量可能很大，这样可以避免全部文件一起读入内存使内存占用过高
-    return bfs.readFile(realFilePath).then(data => {
+    return readFile(realFilePath).then(data => {
       var newPath;
       var sha1 = crypto.createHash('sha1');
       sha1.update(data);
@@ -64,7 +64,7 @@ const revProcessor = ([baseList, staticList]) =>
     var selfChangeList = [];
     var tasks = baseList.map(pathname => {
       // 此处不使用 Promise 扁平化是因为文件数据量可能很大，这样可以避免全部文件一起读入内存使内存占用过高
-      return bfs.readFile(pathname).then(data => {
+      return readFile(pathname).then(data => {
         data += '';
         // data 是读取到的文件内容，遍历 infoList 做一堆替换操作
         var newData = replaces.reduce((base, { matcher, newPath }) => {
@@ -76,7 +76,7 @@ const revProcessor = ([baseList, staticList]) =>
         var replaced = infoListByRealPath[pathname];
         if (replaced) selfChangeList.push({ realFilePath: pathname, oldPath: replaced.newPath });
         // 文件回写
-        return bfs.writeFile(pathname, newData);
+        return writeFile(pathname, newData);
       });
     });
     return Promise.all(tasks).then(() => {
@@ -105,7 +105,7 @@ Promise
 
   .then(revProcessor).then(list => {
     let tasks = list.map(({ oldPath, newPath }) => {
-      return bfs.rename(oldPath, newPath).then(() => [oldPath, newPath]);
+      return rename(oldPath, newPath).then(() => [oldPath, newPath]);
     });
     return Promise.all(tasks);
    })

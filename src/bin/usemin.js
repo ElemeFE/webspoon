@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
-import bfs from 'babel-fs';
+import fs from 'fs';
 import http from 'http';
 import https from 'https';
+import crypto from 'crypto';
 import argollector from 'argollector';
 import Capacitance from 'capacitance';
 
 import globPromise from '../lib/globpromise';
-
 import compressor from '../lib/compressor';
+import { readFile, writeFile } from '../lib/xfs';
 
 
 /**
@@ -96,7 +97,7 @@ Promise
     var cache = {};
     return Promise.all(list.map(pathname => {
       // 此处不使用 Promise 扁平化是因为文件数据量可能很大，这样可以避免全部文件一起读入内存使内存占用过高
-      return bfs.readFile(pathname).then(data => {
+      return readFile(pathname).then(data => {
         data += '';
         data = data.replace(blockMatcher, ($0, configs, content) => {
           configs = matchUsemin(configs);
@@ -125,7 +126,7 @@ Promise
           cache[configs.file] = { resources, output };
           // 读入 list
           list.forEach((item, index) => {
-            let loader =/^https?:/.test(item.file) ? loadRemoteData(item.file) : bfs.readFile(item.file, 'utf8');
+            let loader =/^https?:/.test(item.file) ? loadRemoteData(item.file) : readFile(item.file, 'utf8');
             if (configs.file.match(/\.js$/)) {
               loader = loader.then(data => {
                 // 先不压缩，有个莫名其妙的 Bug @ 2016-01-28
@@ -160,7 +161,7 @@ Promise
               return compressor.css(list.join('\n'));
             }
           }).then(result => {
-            return bfs.writeFile(configs.file, result);
+            return writeFile(configs.file, result);
           }, error => {
             if(typeof error === 'string') throw new Error(error);
             throw new Error([
@@ -174,7 +175,7 @@ Promise
           tasks.push(task);
           return output;
         });
-        return bfs.writeFile(pathname, data);
+        return writeFile(pathname, data);
       });
     })).then(() => Promise.all(tasks));
   })
@@ -189,4 +190,3 @@ Promise
     process.stderr.write('[31m\n' + error.stack + '\n[0m');
     process.exit(1);
   });
-

@@ -1,6 +1,6 @@
 {
   "name": "webspoon",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "这是一个 Web 前端工程化的工具包。",
   "main": "index.js",
   "directories": {
@@ -22,12 +22,15 @@
     "argollector": "^1.0.0",
     "babel-fs": "^1.0.2",
     "capacitance": "^1.0.0",
+    "clean-css": "^3.4.8",
+    "denodeify": "^1.2.1",
     "glob": "^5.0.14",
-    "uglify-js": "^2.6.1",
-    "clean-css": "^3.4.8"
+    "uglify-js": "^2.6.1"
   },
   "devDependencies": {
-    "babel": "^5.8.3"
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-0": "^6.5.0"
   },
   "repository": {
     "type": "git",

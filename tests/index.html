@@ -1,16 +1,37 @@
 <!doctype html>
 <style>
-iframe { border: 0; height: 64px; }
+iframe {
+  border: 0;
+  height: 64px;
+  transform: scale(.5);
+  transform-origin: 0 0;
+  width: 200px;
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+li {
+  width: 100px;
+  height: 64px;
+  border: 1px solid #ccc;
+  float: left;
+  margin: .5em;
+  list-style: none;
+}
+li div {
+  margin: .5em;
+}
 </style>
-<table>
+<ul>
 <script>
 for(var i = 1; i <= 9; i++) {
   document.write(`
-    <tr>
-      <td><h1>test${i}：<h1></td>
-      <td><iframe src="dist/test${i}.html"></iframe></td>
-    </tr>
+    <li>
+      <div>test${i}：</div>
+      <iframe src="dist/test${i}.html"></iframe>
+    </li>
   `);
 }
 </script>
-</table>
+</ul>

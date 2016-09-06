@@ -1,13 +1,14 @@
 {
   "name": "webspoon",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "这是一个 Web 前端工程化的工具包。",
   "main": "index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "prepublish": "make build"
+    "prepublish": "make build",
+    "test": "make test"
   },
   "bin": {
     "webspoon-usemin": "./bin/usemin.js",
@@ -25,6 +26,7 @@
     "clean-css": "^3.4.8",
     "denodeify": "^1.2.1",
     "glob": "^5.0.14",
+    "mkdirp": "^0.5.1",
     "uglify-js": "^2.6.1"
   },
   "devDependencies": {

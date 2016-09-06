@@ -1,9 +1,9 @@
-default: update build
+default: update build check
 
 update:
 	@cd .. && make build
 
-build: clean copy pack wildcard usemin rev check
+build: clean copy pack wildcard usemin rev
 
 clean:
 	@rm -rf dist

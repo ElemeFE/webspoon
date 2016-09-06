@@ -1,33 +1,35 @@
 import cluster from 'cluster';
 import os from 'os';
 import path from 'path';
+import UglifyJS from 'uglify-js';
+import CleanCss from 'clean-css';
+import Storage from './storage';
+import crypto from 'crypto';
+import argollector from 'argollector';
 
-cluster.setupMaster({ exec: path.join(__dirname, './compressor.child.js') });
+const cache = new Storage(argollector['--usemin-cache'] || path.join(process.env.HOME, '.webspoon'));
 
-export default new class {
-  constructor() {
-    this.inc = 0;
-    this.heap = {};
-    this.pool = os.cpus().map(() => cluster.fork());
-    this.pool.forEach(node => node.on('message', message => {
-      if(message.status === 'OK') {
-        this.heap[message.id].resolve(message.code);
-      } else {
-        this.heap[message.id].reject(message.errorMessage);
-      }
-    }));
+const compressWithoutCache = (type, code, hash) => {
+  let result;
+  switch(type) {
+    case 'js':
+      result = UglifyJS.minify(code, { fromString: true }).code;
+      break;
+    case 'css':
+      result = new CleanCss().minify(code).styles;
+      break;
+    default:
+      throw new Error(`Unknown type (${type}) to compress`);
   }
-  compress(code, type, index = Math.random() * this.pool.length | 0) {
-    return new Promise((resolve, reject) => {
-      var id = ++this.inc;
-      this.heap[id] = { resolve, reject, code, type };
-      this.pool[index].send({ id, code, type });
-    });
-  }
-  js(code) {
-    return this.compress(code, 'js');
-  }
-  css(code) {
-    return this.compress(code, 'css');
-  }
+  if (type !== void 0) return cache.set(hash, result).then(() => result, () => result);
+};
+
+const compress = (type, code) => {
+  let hash = crypto.createHash('sha1').update(type + code).digest('hex');
+  return cache.get(hash).catch(() => compressWithoutCache(type, code, hash));
+};
+
+export default {
+  js: compress.bind(null, 'js'),
+  css: compress.bind(null, 'css')
 };

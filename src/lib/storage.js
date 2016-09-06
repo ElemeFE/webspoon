@@ -1,16 +1,19 @@
-import bfs from 'babel-fs';
+import fs from 'fs';
+import denodeify from 'denodeify';
+import mkdirp from 'mkdirp';
 import path from 'path';
+const readFile = denodeify(fs.readFile);
+const writeFile = denodeify(fs.writeFile);
+const mkdirx = denodeify(mkdirp);
 
-// TODO: extract to npm
 export default class Storage {
-  constructor(projectName) {
-    let dirname = path.join(process.env.HOME, '.' + projectName);
-    this.dirname = bfs.mkdir(dirname).then(() => dirname, () => dirname);
+  constructor(dirname = '/tmp') {
+    this.dirname = mkdirx(dirname).then(() => dirname, () => dirname);
   }
-  getItem(name) {
-    return this.dirname.then(dirname => bfs.readFile(path.join(dirname, name)).then(String));
+  get(name) {
+    return this.dirname.then(dirname => readFile(path.join(dirname, name)).then(String));
   }
-  setItem(name, data) {
-    return this.dirname.then(dirname => bfs.writeFile(path.join(dirname, name), data));
+  set(name, data) {
+    return this.dirname.then(dirname => writeFile(path.join(dirname, name), data));
   }
 }

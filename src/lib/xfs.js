@@ -1,5 +1,4 @@
 import argollector from 'argollector';
-import denodefiy from 'denodeify';
 import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
@@ -20,10 +19,22 @@ const log = message => {
   console.log(`${PROC_NAME} ${message}`);
 };
 
-const _readFile = denodefiy(fs.readFile);
-const _writeFile = denodefiy(fs.writeFile);
-const _rename = denodefiy(fs.rename);
-const _stat = denodefiy(fs.stat);
+const promiseifySync = f => {
+  return (...args) => new Promise((resolve, reject) => {
+    try {
+      resolve(f(...args));
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// node 自带的异步文件操作没有锁，直接使用会出问题
+// 除非自己实现锁，否则不要使用异步文件操作
+const _readFile = promiseifySync(fs.readFileSync);
+const _writeFile = promiseifySync(fs.writeFileSync);
+const _rename = promiseifySync(fs.renameSync);
+const _stat = promiseifySync(fs.statSync);
 
 class FileInfo {
   static create(path) {
